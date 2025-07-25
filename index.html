@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <title>Real Estate 3D Viewer</title>
     <style>
-      /* Styles are now in main.css, which is good practice. */
-      /* However, ensure main.css is linked in a real project,
-         for this example, I'll assume it's copied directly or linked correctly. */
-      /* If you want to keep styles in HTML for a single file, you can move them here. */
       html,
       body {
         margin: 0;
@@ -17,25 +13,24 @@
       #container {
         width: 100vw;
         height: 100vh;
-        position: relative; /* Essential for absolute labels */
+        position: relative;
       }
       #app {
         width: 100%;
         height: 100%;
       }
-      /* Add label styles here if you want them in HTML */
       .label {
         position: absolute;
-        background: rgba(10, 100, 0, 0.8); /* Slightly more opaque background */
-        color: white; /* Clearer text color */
+        background: rgba(10, 100, 0, 0.8);
+        color: white;
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 14px;
         pointer-events: none;
         transform: translate(-50%, -50%);
         white-space: nowrap;
-        user-select: none; /* Prevent text selection */
-        z-index: 10; /* Ensure labels are above the canvas */
+        user-select: none;
+        z-index: 10;
       }
     </style>
   </head>
