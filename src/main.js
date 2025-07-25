@@ -47,12 +47,25 @@ controls.addEventListener("change", () => {
 controls.minPolarAngle = Math.PI / 4; // Prevent looking up/down
 controls.maxPolarAngle = Math.PI / 2;
 
+const labelPoints = []; // 👈 Declare globally
+
 const loader = new GLTFLoader();
 loader.load(
   "/model.glb",
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
+
+    // Set points in model space — adjust as needed
+    const point1 = new THREE.Vector3(0, 2.5, 0); // roof
+    const point2 = new THREE.Vector3(1, 0, 0); // door
+
+    const label1 = document.getElementById("label1");
+    const label2 = document.getElementById("label2");
+
+    labelPoints.push({ position: point1, element: label1 });
+    labelPoints.push({ position: point2, element: label2 });
+
     animate();
   },
   undefined,
@@ -63,8 +76,23 @@ loader.load(
 
 function animate() {
   requestAnimationFrame(animate);
-  controls.update(); // ✅ Keep controls responsive
+  controls.update();
   renderer.render(scene, camera);
+
+  labelPoints.forEach(({ position, element }) => {
+    const pos = position.clone();
+    pos.project(camera);
+
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
+
+    // Optionally hide if behind camera
+    const visible = pos.z >= -1 && pos.z <= 1;
+    element.style.display = visible ? "block" : "none";
+  });
 }
 
 window.addEventListener("resize", () => {
