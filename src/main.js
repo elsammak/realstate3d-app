@@ -45,8 +45,14 @@ loader.load(
     scene.add(model);
 
     // Define model 3D points
-    const point1 = new THREE.Vector3(0, 2.5, 0); // 🏠 Roof
-    const point2 = new THREE.Vector3(1, 0, 0); // 🚪 Door
+    // Create anchor points as Object3D children of the model
+    const point1 = new THREE.Object3D(); // Roof
+    point1.position.set(2, 1.5, 0);
+    model.add(point1);
+
+    const point2 = new THREE.Object3D();
+    point2.position.set(0, 0, 2.5);
+    model.add(point2);
 
     const label1 = document.getElementById("label1");
     const label2 = document.getElementById("label2");
@@ -84,7 +90,9 @@ function animate() {
   const labelOffsetY = 300; // px above model point
 
   labelPoints.forEach(({ position, element, line }) => {
-    const worldPos = position.clone();
+    const worldPos = new THREE.Vector3();
+    position.getWorldPosition(worldPos);
+
     const screenPos = worldPos.clone().project(camera);
 
     const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
@@ -122,4 +130,31 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+renderer.domElement.addEventListener("click", (event) => {
+  // Convert mouse to NDC
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  labelPoints.forEach(({ position, element }) => {
+    const worldPos = new THREE.Vector3();
+    position.getWorldPosition(worldPos);
+
+    const distance = raycaster.ray.distanceToPoint(worldPos);
+
+    if (distance < 0.2) {
+      // 👇 Customize these based on label IDs or use a `name` field in labelPoints
+      if (element.id === "label1") {
+        alert("You clicked the Roof!");
+      } else if (element.id === "label2") {
+        alert("You clicked the Door!");
+      }
+    }
+  });
 });
