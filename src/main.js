@@ -39,14 +39,14 @@ controls.maxPolarAngle = fixedPolarAngle;
 controls.update();
 
 const labelPoints = [];
-
+let modelRef = null;
 const loader = new GLTFLoader();
 loader.load(
   "/model.glb",
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
-
+    modelRef = model;
     // Define model 3D points
     // Create anchor points as Object3D children of the model
     const point1 = new THREE.Object3D(); // Roof
@@ -67,6 +67,17 @@ loader.load(
 
     labelPoints.push({ position: point1, element: label1, line: line1 });
     labelPoints.push({ position: point2, element: label2, line: line2 });
+
+    const toggleButton = document.getElementById("toggleModel");
+    let modelVisible = true;
+
+    toggleButton.addEventListener("click", () => {
+      if (modelRef) {
+        modelVisible = !modelVisible;
+        modelRef.visible = modelVisible;
+        toggleButton.textContent = modelVisible ? "Hide Model" : "Show Model";
+      }
+    });
 
     animate();
   },
