@@ -20,7 +20,10 @@ renderer.setClearColor(0xffffff);
 container.appendChild(renderer.domElement);
 
 // Lighting
-scene.add(new THREE.DirectionalLight(0xffffff, 1).position.set(5, 5, 5));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 5, 5);
+scene.add(dirLight);
+
 scene.add(new THREE.AmbientLight(0x666666));
 
 // Controls
@@ -85,36 +88,43 @@ function createLine() {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
-  renderer.render(scene, camera);
 
-  const labelOffsetY = 300; // px above model point
+  updateLabelLines();
+
+  renderer.render(scene, camera);
+}
+
+function updateLabelLines() {
+  const labelOffsetY = 300;
 
   labelPoints.forEach(({ position, element, line }) => {
     const worldPos = new THREE.Vector3();
     position.getWorldPosition(worldPos);
 
+    // Convert world position to NDC (normalized device coordinates)
     const screenPos = worldPos.clone().project(camera);
 
     const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
     const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
-    // Position label (with vertical offset)
+    // Update DOM label position
     element.style.left = `${x}px`;
     element.style.top = `${y - labelOffsetY}px`;
 
-    // Hide if behind camera
+    // Visibility check
     const visible = screenPos.z >= -1 && screenPos.z <= 1;
     element.style.display = visible ? "block" : "none";
     line.visible = visible;
 
-    // Line endpoint = label screen position unprojected into world
+    // 🔁 Label world position from screen (unproject)
     const labelNDC = new THREE.Vector3(
       (x / window.innerWidth) * 2 - 1,
       -((y - labelOffsetY) / window.innerHeight) * 2 + 1,
-      0.5 // Midway between near/far planes
+      0.5 // Z between near/far
     );
     labelNDC.unproject(camera);
 
+    // Update line geometry
     const posArray = line.geometry.attributes.position.array;
     posArray[0] = worldPos.x;
     posArray[1] = worldPos.y;
@@ -148,7 +158,7 @@ renderer.domElement.addEventListener("click", (event) => {
 
     const distance = raycaster.ray.distanceToPoint(worldPos);
 
-    if (distance < 0.2) {
+    if (distance < 1) {
       // 👇 Customize these based on label IDs or use a `name` field in labelPoints
       if (element.id === "label1") {
         alert("You clicked the Roof!");
