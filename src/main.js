@@ -82,6 +82,9 @@ preloadImages(frameImages).then(() => {
       scene.add(model);
       modelRef = model;
 
+      const scaleFactor = computeScaleFactor();
+      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
       const point1 = new THREE.Object3D();
       point1.position.set(2, 1.5, 0);
       model.add(point1);
@@ -137,7 +140,8 @@ preloadImages(frameImages).then(() => {
   }
 
   function updateLabelLines() {
-    const labelOffsetY = 300;
+    const labelOffsetY = 300 * computeScaleFactor();
+
     labelPoints.forEach(({ position, element, line }) => {
       const worldPos = new THREE.Vector3();
       position.getWorldPosition(worldPos);
@@ -181,6 +185,12 @@ preloadImages(frameImages).then(() => {
     const frameIndex =
       Math.round((targetRotation / (2 * Math.PI)) * totalFrames) % totalFrames;
     imgElement.src = frameImages[frameIndex];
+  }
+
+  function computeScaleFactor() {
+    const baseWidth = 1440;
+    const currentWidth = window.innerWidth;
+    return Math.max(currentWidth / baseWidth, 0.5); // don’t scale below 0.5
   }
 
   // function updateImageFromRotation() {
@@ -231,6 +241,10 @@ preloadImages(frameImages).then(() => {
   });
 
   window.addEventListener("resize", () => {
+    const newScale = computeScaleFactor();
+    if (modelRef) {
+      modelRef.scale.set(newScale, newScale, newScale);
+    }
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
