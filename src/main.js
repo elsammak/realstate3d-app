@@ -62,6 +62,7 @@ preloadImages(frameImages).then(() => {
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 1.5, 0);
   controls.enableDamping = true;
+  controls.enableRotate = false; // prevent user free rotation
   controls.dampingFactor = 0.05;
   controls.enablePan = false;
   controls.enableZoom = false;
@@ -110,6 +111,7 @@ preloadImages(frameImages).then(() => {
         }
       });
 
+      updateRotationSnap();
       animate();
     },
     undefined,
@@ -130,7 +132,7 @@ preloadImages(frameImages).then(() => {
     requestAnimationFrame(animate);
     controls.update();
     updateLabelLines();
-    updateImageFromRotation();
+    // updateImageFromRotation();
     renderer.render(scene, camera);
   }
 
@@ -170,12 +172,63 @@ preloadImages(frameImages).then(() => {
 
   const imgElement = document.getElementById("frameViewer");
 
-  function updateImageFromRotation() {
-    const azimuthAngle = controls.getAzimuthalAngle(); // -π to π
-    const normalizedAngle = 1 - (azimuthAngle + Math.PI) / (2 * Math.PI);
-    const frameIndex = Math.floor(normalizedAngle * totalFrames) % totalFrames;
+  function updateRotationSnap() {
+    if (modelRef) {
+      modelRef.rotation.y = targetRotation;
+    }
+
+    // Image sync
+    const frameIndex =
+      Math.round((targetRotation / (2 * Math.PI)) * totalFrames) % totalFrames;
     imgElement.src = frameImages[frameIndex];
   }
+
+  // function updateImageFromRotation() {
+  //   const azimuthAngle = controls.getAzimuthalAngle(); // -π to π
+  //   const normalizedAngle = 1 - (azimuthAngle + Math.PI) / (2 * Math.PI);
+  //   const frameIndex = Math.floor(normalizedAngle * totalFrames) % totalFrames;
+  //   imgElement.src = frameImages[frameIndex];
+  // }
+
+  let isDragging = false;
+  let startX = 0;
+  let targetRotation = 0;
+
+  let totalSteps = 38; // Default
+  let stepAngle = (2 * Math.PI) / totalSteps;
+
+  const stepInput = document.getElementById("stepInput");
+  stepInput.addEventListener("change", () => {
+    const userInput = parseInt(stepInput.value, 10);
+    if (!isNaN(userInput) && userInput > 0) {
+      totalSteps = userInput;
+    } else {
+      totalSteps = 38; // fallback to default
+    }
+    stepAngle = (2 * Math.PI) / totalSteps;
+  });
+
+  renderer.domElement.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    startX = e.clientX;
+  });
+
+  renderer.domElement.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+
+  renderer.domElement.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 10) {
+      const direction = dx > 0 ? 1 : -1; // ✅ FIXED
+      targetRotation =
+        (targetRotation + direction * stepAngle + 2 * Math.PI) % (2 * Math.PI);
+      updateRotationSnap();
+      startX = e.clientX;
+    }
+  });
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
