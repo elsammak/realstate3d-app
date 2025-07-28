@@ -14,9 +14,9 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(0, 5, 6);
 camera.lookAt(0, 1.5, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xffffff);
+renderer.setClearColor(0x000000, 0); // ✅ fully transparent
 container.appendChild(renderer.domElement);
 
 // Lighting
@@ -185,7 +185,6 @@ const frameImages = [];
 
 for (let i = 0; i < totalFrames; i++) {
   const number = String(i).padStart(4, "0"); // => 000, 001, ..., 037
-  console.log(number);
   frameImages.push(`/images/36_${number}_Ultra.jpeg`);
 }
 
