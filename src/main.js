@@ -10,7 +10,7 @@ const progressBar = document.getElementById("progress-bar");
 
 for (let i = 0; i < totalFrames; i++) {
   const number = String(i).padStart(4, "0");
-  frameImages.push(`/images/36_${number}_Ultra.jpeg`);
+  frameImages.push(`images/36_${number}_Ultra.jpeg`);
 }
 
 function preloadImages(images) {
