@@ -43,6 +43,20 @@
     </button>
 
     <div id="container">
+      <img
+        id="frameViewer"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          z-index: 0;
+          pointer-events: none;
+        "
+      />
+
       <div id="app"></div>
       <div class="label" id="label1">🏠 Roof</div>
       <div class="label" id="label2">🚪 Door</div>

@@ -101,7 +101,7 @@ function animate() {
   controls.update();
 
   updateLabelLines();
-
+  updateImageFromRotation();
   renderer.render(scene, camera);
 }
 
@@ -179,3 +179,22 @@ renderer.domElement.addEventListener("click", (event) => {
     }
   });
 });
+
+const totalFrames = 38;
+const frameImages = [];
+
+for (let i = 0; i < totalFrames; i++) {
+  const number = String(i).padStart(4, "0"); // => 000, 001, ..., 037
+  console.log(number);
+  frameImages.push(`/images/36_${number}_Ultra.jpeg`);
+}
+
+const imgElement = document.getElementById("frameViewer");
+
+function updateImageFromRotation() {
+  const azimuthAngle = controls.getAzimuthalAngle(); // -π to π
+  const normalizedAngle = 1 - (azimuthAngle + Math.PI) / (2 * Math.PI);
+
+  const frameIndex = Math.floor(normalizedAngle * totalFrames) % totalFrames;
+  imgElement.src = frameImages[frameIndex];
+}
